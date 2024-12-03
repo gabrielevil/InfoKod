@@ -1,11 +1,11 @@
-from encoder import Encoder
+from encoder2 import Encoder
 import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="Process program call arguments.")
     parser.add_argument('-i', '--input', type=str, required=True, help="Input file path")
     parser.add_argument('-o', '--output', type=str, required=True, help="Output file path")
-    parser.add_argument('-n', '--number_of_encoded_symbols', type=int, default=1, help="Amount of symbols Huffman's code encodes(default: 1)")
+    parser.add_argument('-n', '--number_of_encoded_symbols', type=int, default=8, help="Amount of symbols Huffman's code encodes(default: 1)")
     args = parser.parse_args()
     
     encoder = Encoder()
