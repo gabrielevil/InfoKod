@@ -19,7 +19,7 @@ def main():
     huffman_codes = encoder.huffman_encoding() #uzkodavimo algoritmas
 
     print("Prefix-free check:", encoder.is_prefix_free())
-    encoder.encode_to_file(input_file, output_path, n) #input tekstas uzkoduojamas i output faila  
+    encoder.encode_to_file(input_file, output_path, n) #input tekstas uzkoduojamas i output faila
 
 if __name__ == "__main__":
     main()

@@ -20,7 +20,7 @@ class Encoder:
             # Step 3: Split the binary representation into chunks of 'n' bits
             self.binary_chunks = [
                 binary_representation[i:i + n]
-                for i in range(0, len(binary_representation) - (len(binary_representation) % n), n)
+                for i in range(0, len(binary_representation), n)
             ]
 
             # Step 4: Retain the tail (leftover bits that don't fit into 'n' bits)
@@ -40,7 +40,6 @@ class Encoder:
             return self.char_count
         except FileNotFoundError:
             print(f"Error: The file '{input_file}' does not exist.")
-
 
     def calculate_probabilities(self):
         if not hasattr(self, 'char_count') or not self.char_count:
@@ -84,6 +83,39 @@ class Encoder:
 
         return self.huffman_dict
 
+    def encode_huffman_tree(self):
+        """
+        Encodes the Huffman tree into a compact binary representation using pre-order traversal.
+
+        Returns:
+            str: Encoded representation of the Huffman tree.
+        """
+        def build_tree(huffman_dict):
+            root = {}
+            for symbol, code in self.huffman_dict.items():
+                current_node = root
+                for bit in code:
+                    if bit == '0':
+                        current_node = current_node.setdefault('0', {})
+                    else:
+                        current_node = current_node.setdefault('1', {})
+                current_node['symbol'] = symbol  # Store the symbol at the leaf
+            return root
+
+        def traverse(node):
+            if 'symbol' in node:  # It's a leaf node
+                return f"1{node['symbol']}"  # 1 followed by the symbol
+            # Internal node: Traverse left and right
+            left = traverse(node.get('0', {})) if '0' in node else ''
+            right = traverse(node.get('1', {})) if '1' in node else ''
+            return f"0{left}{right}"
+
+        # Build the Huffman tree from the dictionary
+        huffman_tree = build_tree(self.huffman_dict)
+
+        # Encode the tree
+        return traverse(huffman_tree)
+
     def encode_to_file(self, input_file, output_file, n):
         if not hasattr(self, 'huffman_dict') or not self.huffman_dict:
             print("Error: Huffman codes not generated. Please run 'huffman_encoding' first.")
@@ -100,18 +132,25 @@ class Encoder:
     
             # Convert (n - 2) to a 4-bit binary representation
             n_binary = format(n - 2, '04b')  # Ensure n - 2 fits into 4 bits
-            encoded_binary_with_n = n_binary + encoded_binary
+            print(f"n - 2 in binary: {n_binary}")
+    
+            # Encode the Huffman tree
+            encoded_tree = self.encode_huffman_tree()
+            print(f"\nEncoded Huffman Tree: {encoded_tree}")
+    
+            # Combine n_binary, the encoded tree, and the encoded data
+            final_output = n_binary + encoded_tree + encoded_binary
     
             # Write the final encoded data to the output file
             with open(output_file, 'w', encoding='utf-8') as output:
-                output.write(encoded_binary_with_n)
+                output.write(final_output)
     
-            print(f"\nEncoded data with n (4-bit prefix) written to '{output_file}'.")
-            print(f"n - 2 in binary: {n_binary}")
+            print(f"\nEncoded data with n (4-bit prefix) and Huffman tree written to '{output_file}'.")
         except KeyError as e:
             print(f"Error: Chunk '{e.args[0]}' not found in Huffman codes.")
         except Exception as e:
             print(f"Error: {str(e)}")
+
 
     def is_prefix_free(self):
         if not hasattr(self, 'huffman_dict') or not self.huffman_dict:
