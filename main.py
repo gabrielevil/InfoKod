@@ -1,42 +1,48 @@
-from encoder2 import Encoder
+from encoder import Encoder
 from decoder import Decoder
 import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Process program call arguments.")
+    parser = argparse.ArgumentParser(description="Huffman Encoding and Decoding")
     parser.add_argument('-i', '--input', type=str, required=True, help="Input file path")
-    parser.add_argument('-o', '--output', type=str, required=True, help="Output file path")
-    parser.add_argument('-n', '--number_of_encoded_symbols', type=int, default=8, help="Amount of symbols Huffman's code encodes (default: 8)")
+    parser.add_argument('-o', '--output', type=str, required=True, help="Output encoded file path")
+    parser.add_argument('-d', '--decoded', type=str, required=True, help="Output decoded file path")
+    parser.add_argument('-n', '--number_of_encoded_symbols', type=int, default=8, help="Number of bits per symbol (default: 8)")
+
     args = parser.parse_args()
 
-    # Step 1: Encoding
-    encoder = Encoder()
     input_file = args.input
     output_file = args.output
+    decoded_file = args.decoded
     n = args.number_of_encoded_symbols
 
+    # Step 1: Encoding
     print("Encoding...")
+    encoder = Encoder()
     encoder.read_input(input_file, n)
     encoder.calculate_probabilities()
     encoder.huffman_encoding()
-    encoder.encode_to_file(input_file, output_file, n)
+    encoder.encode_to_file(output_file, n)
 
-    decoder = Decoder()
+    print(f"\nFile encoded successfully: {output_file}\n")
+
+    # Step 2: Decoding
     print("Decoding...")
+    decoder = Decoder()
+    decoded_result = decoder.decode_file(output_file)
 
-    # Read and decode the output file
-    decoded_binary = decoder.read_encoded_file(output_file)  # Read and decode the binary data
-    decoded_result = decoder.decode_data(decoded_binary)  # Decode the binary Huffman-encoded data
+    if decoded_result:
+        print("\nDecoded Result:")
+        print(decoded_result)
 
-    # Convert decoded binary to UTF-8
-    utf_decoded = "".join(
-        chr(int(decoded_result[i:i + 8], 2)) for i in range(0, len(decoded_result), 8)
-    )
+        # Write decoded content to a file
+        with open(decoded_file, 'w', encoding='utf-8') as file:
+            file.write(decoded_result)
 
-    # Print decoded value to the terminal
-    print("\nDecoded Value (UTF-8):")
-    print(utf_decoded)
+        print(f"\nDecoded content written to: {decoded_file}")
+    else:
+        print("\nDecoding failed. Please check the file format.")
 
 
 if __name__ == "__main__":

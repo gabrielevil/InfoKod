@@ -2,85 +2,106 @@ class Decoder:
     def __init__(self):
         self.huffman_tree = None
         self.n = None
+        self.tail_length = 0
 
     def read_encoded_file(self, input_file):
-        """
-        Reads the encoded file sequentially to extract `n`, the Huffman tree, and the encoded data.
-        """
         try:
-            with open(input_file, 'r', encoding='utf-8') as file:
-                # Step 1: Read the first 4 bits to extract `n`
-                n_binary = file.read(4)
-                self.n = int(n_binary, 2) + 2
-                print(f"Decoded n: {self.n}")
+            with open(input_file, 'rb') as file:
+                # Read file and convert to binary string
+                binary_data = file.read()
+                binary_string = ''.join(f'{byte:08b}' for byte in binary_data)
 
-                # Step 2: Read the Huffman tree progressively
-                encoded_tree = self._read_tree(file)
-                print(f"Encoded Huffman Tree: {encoded_tree}")
+            # Ignore all leading zeros and the first '1'
+            start_index = binary_string.find('1') + 1
+            if start_index == 0:
+                raise ValueError("Invalid file format: Missing start bit '1'.")
 
-                # Step 3: Decode the Huffman tree
-                self.huffman_tree = self.decode_huffman_tree(encoded_tree, self.n)
-                print(f"Reconstructed Huffman Tree: {self.huffman_tree}")
+            # Remove trash bits
+            binary_string = binary_string[start_index:]
 
-                # Step 4: Read the rest of the file as the encoded data
-                encoded_data = file.read()
-                print(f"Encoded Data: {encoded_data}")
+            # Extract header info
+            n_binary = binary_string[:4]
+            self.n = int(n_binary, 2) + 1
+            print(f"Decoded n: {self.n}")
 
-                return encoded_data
+            tail_length_binary = binary_string[4:8]
+            self.tail_length = int(tail_length_binary, 2)
+            print(f"Tail Length: {self.tail_length}")
+
+            # Extract tail
+            self.tail = binary_string[8:8 + self.tail_length]
+            print(f"Extracted Tail: {self.tail}")
+
+            # Remaining string after header and tail
+            remaining_string = binary_string[8 + self.tail_length:]
+
+            # Extract Huffman Tree
+            tree_end_index, encoded_tree = self._extract_huffman_tree(remaining_string)
+            print(f"Encoded Huffman Tree: {encoded_tree}")
+
+            # Rebuild Huffman Tree
+            self.huffman_tree = self.decode_huffman_tree(encoded_tree, self.n)
+            print(f"Reconstructed Huffman Tree: {self.huffman_tree}")
+
+            # Extract Encoded Text
+            encoded_data = remaining_string[tree_end_index:]
+            print(f"Encoded Data: {encoded_data}")
+
+            return encoded_data
         except FileNotFoundError:
             print(f"Error: The file '{input_file}' does not exist.")
             return None
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return None
 
-    def _read_tree(self, file):
+    def _extract_huffman_tree(self, binary_string):
         """
-        Reads the Huffman tree from the file using pre-order traversal, respecting `n` bits per symbol.
+        Extracts the Huffman tree from the binary string using pre-order traversal.
         """
+        iterator = iter(binary_string)
         tree = []
         stack = []
 
         while True:
-            bit = file.read(1)
-            if not bit:
+            try:
+                bit = next(iterator)
+            except StopIteration:
                 raise ValueError("Unexpected end of file while reading the Huffman tree.")
 
             if bit == '1':  # Leaf node
-                # Read the next `n` bits as the symbol
-                symbol = file.read(self.n)
-                if len(symbol) != self.n:
-                    raise ValueError("Incomplete symbol in Huffman tree.")
+                symbol = ''.join(next(iterator) for _ in range(self.n))
                 tree.append(f"1{symbol}")
-                stack.append('1')  # Mark this as a leaf node
+                stack.append('1')
             elif bit == '0':  # Internal node
                 tree.append('0')
-                stack.append('0')  # Mark this as an internal node
+                stack.append('0')
 
-            # Pop pairs when a subtree is complete
-            while len(stack) >= 3 and stack[-3] == '0' and stack[-2] != '0' and stack[-1] != '0':
+            while len(stack) >= 3 and stack[-3:] == ['0', '1', '1']:
                 stack.pop()
                 stack.pop()
                 stack.pop()
-                stack.append('1')  # Replace the subtree with a single node
+                stack.append('1')  # Collapse subtree
 
-            # If the entire tree is reconstructed
             if len(stack) == 1 and stack[0] == '1':
                 break
 
-        return "".join(tree)
+        encoded_tree = ''.join(tree)
+        tree_end_index = len(encoded_tree)
+        return tree_end_index, encoded_tree
 
     def decode_huffman_tree(self, encoded_tree, n):
         """
-        Decodes the Huffman tree from its encoded representation, respecting `n` bits per symbol.
+        Decodes the Huffman tree from its binary representation.
         """
         def build_tree(iterator):
             value = next(iterator)
             if value == '0':  # Internal node
                 return {'0': build_tree(iterator), '1': build_tree(iterator)}
             elif value == '1':  # Leaf node
-                # Extract the next `n` bits as the symbol
-                symbol = "".join(next(iterator) for _ in range(n))
+                symbol = ''.join(next(iterator) for _ in range(n))
                 return {'symbol': symbol}
 
-        # Create an iterator for the encoded tree string
         iterator = iter(encoded_tree)
         return build_tree(iterator)
 
@@ -92,32 +113,29 @@ class Decoder:
         node = self.huffman_tree
 
         for bit in encoded_data:
-            if bit == '0':
-                node = node.get('0', {})
-            elif bit == '1':
-                node = node.get('1', {})
-
-            # If a leaf node is reached
+            node = node.get(bit, {})
             if 'symbol' in node:
                 decoded_text.append(node['symbol'])
                 node = self.huffman_tree  # Reset to the root for the next symbol
 
-        return "".join(decoded_text)
+        return ''.join(decoded_text)
 
     def decode_file(self, input_file):
         """
-        Decodes the contents of the input file and returns the decoded text as UTF-8.
+        Decodes the contents of the input file and returns the decoded text.
         """
         encoded_data = self.read_encoded_file(input_file)
         if not encoded_data:
             return None
-    
+
         # Decode binary Huffman-encoded data
         decoded_text = self.decode_data(encoded_data)
-    
+
         # Convert binary to UTF-8
-        utf_decoded = "".join(
+        utf_decoded = ''.join(
             chr(int(decoded_text[i:i + 8], 2)) for i in range(0, len(decoded_text), 8)
         )
-    
+
+        print("\nDecoded Value (UTF-8):")
+        print(utf_decoded)
         return utf_decoded
