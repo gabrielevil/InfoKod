@@ -131,11 +131,6 @@ class Decoder:
         # Decode binary Huffman-encoded data
         decoded_text = self.decode_data(encoded_data)
 
-        # Convert binary to UTF-8
-        utf_decoded = ''.join(
-            chr(int(decoded_text[i:i + 8], 2)) for i in range(0, len(decoded_text), 8)
-        )
-
         print("\nDecoded Value (UTF-8):")
-        print(utf_decoded)
-        return utf_decoded
+        print(decoded_text)
+        return decoded_text

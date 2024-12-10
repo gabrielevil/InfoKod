@@ -37,8 +37,8 @@ def main():
         print(decoded_result)
 
         # Write decoded content to a file
-        with open(decoded_file, 'w', encoding='utf-8') as file:
-            file.write(decoded_result)
+        with open(decoded_file, 'wb') as file:
+            file.write(bytes(int(decoded_result[i:i + 8], 2) for i in range(0, len(decoded_result), 8)))
 
         print(f"\nDecoded content written to: {decoded_file}")
     else:
