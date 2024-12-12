@@ -31,9 +31,9 @@ def main():
         print(f"Number of mistakes: {mistakes}")
 
         # Decode encoded data
-        decoded_data = decoder.decode(encoded_data)
-        print("Encoded:")
-        print(encoded_data)
+        decoded_data = decoder.decode(wrong_data)
+        #print("Encoded:")
+        #print(encoded_data)
         print("Decoded:")
         print(decoded_data)
 
