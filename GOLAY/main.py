@@ -1,9 +1,11 @@
 import sys
 from encoder import GolayEncoder
+from decoder import GolayDecoder
 
 def main():
     encoder = GolayEncoder()
-    
+    decoder = GolayDecoder()
+
     print("Enter a binary sequence (only 0 and 1):")
     try:
         input_data = input().strip()
@@ -27,10 +29,18 @@ def main():
         # Count mistakes
         mistakes = sum(1 for a, b in zip(encoded_data, wrong_data) if a != b)
         print(f"Number of mistakes: {mistakes}")
-    
+
+        # Decode encoded data
+        decoded_data = decoder.decode(encoded_data)
+        print("Encoded:")
+        print(encoded_data)
+        print("Decoded:")
+        print(decoded_data)
+
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
