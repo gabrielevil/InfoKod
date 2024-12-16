@@ -48,12 +48,11 @@ def main():
         
         #dekoduoti sugadinta - grazina istaisyta ir parodo istaisyma (ar tas pats originalus ar jau kitas?)
 
-        # Decode encoded data
-        decoded_data = decoder.decode(encoded_data)
-        print("Encoded:")
-        print(encoded_data)
-        print("Decoded:")
+        decoded_data = decoder.decode(wrong_data)
+        print("Decoded corrupted data:")
         print(decoded_data)
+        print(input_data)
+        
 
     except Exception as e:
         print(f"Error: {e}")
