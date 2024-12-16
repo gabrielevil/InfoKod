@@ -10,8 +10,8 @@ class Encoder:
             # Convert binary data to a binary string
             binary_representation = ''.join(f'{byte:08b}' for byte in binary_data)
 
-            print("\nBinary Representation:")
-            print(binary_representation)
+            # print("\nBinary Representation:")
+            # print(binary_representation)
 
             # Handle leftover bits
             remainder = len(binary_representation) % n
@@ -23,17 +23,17 @@ class Encoder:
                 for i in range(0, len(binary_representation)-remainder, n)
             ]
 
-            if self.tail:
-                print(f"\nTail (leftover bits): {self.tail}")
+            # if self.tail:
+            #     print(f"\nTail (leftover bits): {self.tail}")
 
-            print(f"\nBinary Chunks ({n} bits each):")
-            print(self.binary_chunks)
+            # print(f"\nBinary Chunks ({n} bits each):")
+            # print(self.binary_chunks)
 
             # Count occurrences of the chunks
             self.char_count = Counter(self.binary_chunks)
-            print("\nChunk Frequencies:")
-            for chunk, count in self.char_count.items():
-                print(f"'{chunk}' : {count}")
+            # print("\nChunk Frequencies:")
+            # for chunk, count in self.char_count.items():
+            #     print(f"'{chunk}' : {count}")
 
             return self.char_count
         except FileNotFoundError:
@@ -43,9 +43,9 @@ class Encoder:
         total_chunks = sum(self.char_count.values())
         self.probabilities = {chunk: count / total_chunks for chunk, count in self.char_count.items()}
 
-        print("\nChunk Probabilities:")
-        for chunk, prob in self.probabilities.items():
-            print(f"'{chunk}' : {prob:.4f}")
+        # print("\nChunk Probabilities:")
+        # for chunk, prob in self.probabilities.items():
+        #     print(f"'{chunk}' : {prob:.4f}")
 
         return self.probabilities
 
@@ -65,9 +65,9 @@ class Encoder:
         huffman_codes = sorted(heapq.heappop(heap)[1:], key=lambda p: (len(p[1]), p))
         self.huffman_dict = {chunk: code for chunk, code in huffman_codes}
 
-        print("\nHuffman Codes:")
-        for chunk, code in self.huffman_dict.items():
-            print(f"'{chunk}': {code}")
+        # print("\nHuffman Codes:")
+        # for chunk, code in self.huffman_dict.items():
+        #     print(f"'{chunk}': {code}")
 
         return self.huffman_dict
 
@@ -124,3 +124,5 @@ class Encoder:
             print(f"Error: Missing chunk '{e.args[0]}' in Huffman codes.")
         except Exception as e:
             print(f"Error: {str(e)}")
+        
+

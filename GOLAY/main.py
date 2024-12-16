@@ -29,13 +29,13 @@ def main():
         # Count mistakes
         mistakes = sum(1 for a, b in zip(encoded_data, wrong_data) if a != b)
         print(f"Number of mistakes: {mistakes}")
-
+        #dekoduoti sugadinta - grazina istaisyta ir parodo istaisyma (ar tas pats originalus ar jau kitas?)
         # Decode encoded data
-        decoded_data = decoder.decode(encoded_data)
-        print("Encoded:")
-        print(encoded_data)
-        print("Decoded:")
-        print(decoded_data)
+        # decoded_data = decoder.decode(encoded_data)
+        # print("Encoded:")
+        # print(encoded_data)
+        # print("Decoded:")
+        # print(decoded_data)
 
     except Exception as e:
         print(f"Error: {e}")

@@ -26,26 +26,26 @@ class Decoder:
 
             tail_length_binary = binary_string[4:8]
             self.tail_length = int(tail_length_binary, 2)
-            print(f"Tail Length: {self.tail_length}")
+            # print(f"Tail Length: {self.tail_length}")
 
             # Extract tail
             self.tail = binary_string[8:8 + self.tail_length]
-            print(f"Extracted Tail: {self.tail}")
+            # print(f"Extracted Tail: {self.tail}")
 
             # Remaining string after header and tail
             remaining_string = binary_string[8 + self.tail_length:]
 
             # Extract Huffman Tree
             tree_end_index, encoded_tree = self._extract_huffman_tree(remaining_string)
-            print(f"Encoded Huffman Tree: {encoded_tree}")
+            # print(f"Encoded Huffman Tree: {encoded_tree}")
 
             # Rebuild Huffman Tree
             self.huffman_tree = self.decode_huffman_tree(encoded_tree, self.n)
-            print(f"Reconstructed Huffman Tree: {self.huffman_tree}")
+            # print(f"Reconstructed Huffman Tree: {self.huffman_tree}")
 
             # Extract Encoded Text
             encoded_data = remaining_string[tree_end_index:]
-            print(f"Encoded Data: {encoded_data}")
+            # print(f"Encoded Data: {encoded_data}")
 
             return encoded_data
         except FileNotFoundError:
@@ -131,6 +131,6 @@ class Decoder:
         # Decode binary Huffman-encoded data
         decoded_text = self.decode_data(encoded_data)
 
-        print("\nDecoded Value (UTF-8):")
-        print(decoded_text)
+        # print("\nDecoded Value (UTF-8):")
+        # print(decoded_text)
         return decoded_text
